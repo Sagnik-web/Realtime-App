@@ -1,0 +1,25 @@
+const { kafka } = require("./client");
+
+const consumer = kafka.consumer({ groupId: group });
+
+async function init() {
+  await consumer.connect();
+
+  await consumer.subscribe({ topics: ["rider-updates"], fromBeginning: true });
+
+    
+  await consumer.run({
+    eachMessage: async ({ topic, partition, message, heartbeat, pause }) => {
+      console.log(
+        // `${group}: [${topic}]: PART:${partition}:`,
+         message.value.toString()
+      );
+      io.emit('chat message',JSON.parse(message.value.toString()))
+      
+    },
+  });
+
+
+}
+
+init().catch(console.error);
