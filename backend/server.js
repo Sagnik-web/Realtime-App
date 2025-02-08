@@ -2,7 +2,9 @@ const http = require('http')
 const app = require('./app')
 const socketIO = require('socket.io')
 const server = http.createServer(app)
-
+const { kafka } = require("./kafka/client");
+// const initConsumer = require("./kafka/consumer")
+// const producerCall = require("./kafka/producer")
 
 const io = socketIO(server, {
     cors: {
@@ -10,13 +12,33 @@ const io = socketIO(server, {
     //   methods: ["GET", "POST"]
     }})
 
-io.on('connection',(socket)=>{
-    console.log("user connected successfully")
 
-    socket.on('message',data=>{
-        console.log(data);
-        
+const producer = kafka.producer();
+producer.connect();
+
+
+
+io.on('connection', (socket)=>{
+    console.log("user connected successfully")
+  
+
+    socket.on('message',async data=>{
+        // console.log(data);
+
+        await producer.send({
+            topic: "rider-updates",
+            messages: [
+              {
+                partition: 0 ,
+                key: "location-update",
+                value: JSON.stringify(data),
+              },
+            ],
+        });
+    
+       
     })
+
 
 
     socket.on('disconnect',()=>{
@@ -24,6 +46,32 @@ io.on('connection',(socket)=>{
         
     })
 })
+
+
+
+const consumer = kafka.consumer({ groupId: "up" });
+
+async function init() {
+  await consumer.connect();
+
+  await consumer.subscribe({ topics: ["rider-updates"], fromBeginning: true });
+
+    
+  await consumer.run({
+    eachMessage: async ({ topic, partition, message, heartbeat, pause }) => {
+      console.log(
+        // `${group}: [${topic}]: PART:${partition}:`,
+        JSON.parse(message.value.toString())
+      );
+      io.emit('chat message',JSON.parse(message.value.toString()))
+      
+    },
+  });
+
+
+}
+
+init().catch(console.error);
 
 
 const port = 5000

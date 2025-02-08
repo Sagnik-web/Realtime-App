@@ -1,8 +1,8 @@
-const { kafka } = require("./client");
+// const { kafka } = require("./client");
 
-const consumer = kafka.consumer({ groupId: group });
+// const consumer = kafka.consumer({ groupId: group });
 
-async function init() {
+async function initConsumer(consumer) {
   await consumer.connect();
 
   await consumer.subscribe({ topics: ["rider-updates"], fromBeginning: true });
@@ -12,14 +12,14 @@ async function init() {
     eachMessage: async ({ topic, partition, message, heartbeat, pause }) => {
       console.log(
         // `${group}: [${topic}]: PART:${partition}:`,
-         message.value.toString()
+        JSON.parse(message.value.toString())
       );
       io.emit('chat message',JSON.parse(message.value.toString()))
       
     },
   });
 
-
 }
 
-init().catch(console.error);
+module.exports = initConsumer
+

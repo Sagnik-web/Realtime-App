@@ -8,15 +8,41 @@ const server = io("http://localhost:5000")
 function App() {
 
   const [val, setVal] = useState(0)
+  const [data,setData] = useState([])
 
-
+  const [newVal,setNewVal] = useState({val:0})
   // useEffect(()=>{
-  server.emit("message",{val:Number(val)})
+ 
+
+  function sendMessage(val) {
+    setVal(val)
+    server.emit("message",{val:Number(val)})
+  }
   // },[val])
+
+  server.on('chat message', (chat_data) => {
+    console.log('Received from server:', chat_data);
+    setNewVal(chat_data)
+    // setData([...data,chat_data])
+
+  });
+
+
+  useEffect(()=>{
+    setData([...data, newVal])
+  },[newVal])
 
   return (
     <>
-     <input type="number" value={val} onChange={e=>setVal(e.target.value)} />
+     <input type="number" value={val} onChange={e=>sendMessage(e.target.value)} />
+      <br ></br>
+      {data.map(el=>
+      <p>
+        {el.val}
+      </p>
+        
+        
+        )}
     </>
   )
 }
