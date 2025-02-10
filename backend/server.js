@@ -39,6 +39,10 @@ io.on('connection', (socket)=>{
        
     })
 
+    socket.on("geo-location",data=>{
+      console.log(data);
+      
+    })
 
 
     socket.on('disconnect',()=>{
