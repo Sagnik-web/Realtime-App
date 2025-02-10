@@ -2,8 +2,9 @@
 import { useEffect, useState } from 'react'
 import './App.css'
 import {io} from "socket.io-client"
+import GeoLocation from './pages/GeoLocation'
 
-const server = io("http://localhost:5000")
+const server = io("")
 
 function App() {
 
@@ -32,17 +33,22 @@ function App() {
     setData([...data, newVal])
   },[newVal])
 
+
+
+
+
   return (
     <>
-     <input type="number" value={val} onChange={e=>sendMessage(e.target.value)} />
+    <GeoLocation socket={server}/>
+      <input type="number" value={val} onChange={e=>sendMessage(e.target.value)} />
       <br ></br>
       {data.map(el=>
       <p>
         {el.val}
       </p>
-        
-        
         )}
+
+        
     </>
   )
 }
